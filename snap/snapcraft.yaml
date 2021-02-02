@@ -1,0 +1,295 @@
+name: onlyoffice-ds
+version: "5.4.0"
+summary: "An online office suite that allowing to create, view and edit documents."
+description: "ONLYOFFICE Document Server is an online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time."
+icon: snap/icons/asc-de-256.png
+grade: stable
+confinement: strict
+base: core18
+architectures:
+  - amd64
+
+apps:
+  documentserver:
+    command: usr/sbin/documentserver-start.sh
+    daemon: simple
+    plugs: [network, network-bind, removable-media]
+
+  node:
+    command: bin/node
+    plugs: [network, network-bind, removable-media]
+  
+  nginx:
+    command: usr/sbin/nginx-start.sh
+    daemon: simple
+    restart-condition: always
+    plugs: [network, network-bind, removable-media]
+
+  rabbitmq:
+    command: usr/lib/rabbitmq/bin/rabbitmq-server
+    daemon: simple
+    plugs: [network, network-bind, removable-media]
+
+  redis:
+    command: redis-server
+    daemon: simple
+    plugs: [network, network-bind, removable-media]
+
+  # MySQL daemon
+  mysql:
+    command: start_mysql
+    stop-command: support-files/mysql.server stop
+    daemon: simple
+    restart-condition: always
+    plugs: [network, network-bind]
+  
+  # MySQL client
+  mysql-client:
+    command: run-mysql
+    plugs: [network, network-bind]
+
+  mysqldump:
+    command: mysqldump --defaults-file=$SNAP_DATA/mysql/root.ini --lock-tables onlyoffice
+    plugs: [network, network-bind]
+
+hooks:
+  configure:
+    plugs: [network, network-bind, account-control, gpg-keys, accounts-service, system-observe] #system-files, 
+
+parts:
+  rabbitmq:
+    plugin: dump
+    source: https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_15/rabbitmq-server_3.6.15-1_all.deb
+    source-type: deb
+    stage-packages:
+      - erlang
+    override-build: |
+      snapcraftctl build
+      # rabbitmq-server
+      sed -i -e 's/rabbitmq-env/rabbitmq-env-start.sh/g' $SNAPCRAFT_PART_INSTALL/usr/lib/rabbitmq/lib/rabbitmq_server-3.6.15/sbin/rabbitmq-server
+      sed -i -e 's/ROOTDIR=/ROOTDIR=$SNAP/g' $SNAPCRAFT_PART_INSTALL/usr/lib/erlang/bin/erl
+
+  onlyoffice-ds:
+    plugin: dump
+    source: http://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver_amd64.deb
+    source-type: deb
+    stage-packages:
+      - libxml2
+      - fonts-dejavu
+      - fonts-liberation
+      - ttf-mscorefonts-installer
+      - fonts-crosextra-carlito
+      - fonts-takao-gothic
+      - fonts-opensymbol
+      - create-resources
+      - libreadline-dev
+      - libc-bin
+      - locales-all
+      - locales
+      - libc6
+    override-build: |
+      rm -f lib/libicuuc.so.58
+      rm -f lib/libPdfWriter.so
+      rm -f lib/libdoctrenderer.so
+      rm -f lib/libHtmlFile.so
+      rm -f lib/libHtmlRenderer.so
+      rm -f lib/libPdfReader.so
+      rm -f lib/libkernel.so
+      rm -f lib/libXpsFile.so
+      rm -f lib/libDjVuFile.so
+      rm -f lib/libUnicodeConverter.so
+      rm -f lib/libicudata.so.58
+      rm -f lib/libgraphics.so
+      snapcraftctl build
+      # editing supervisor/* && /supervisord.conf
+      sed -i -e 's/\/var\/www/%(ENV_SNAP)s\/var\/www/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/supervisor/*
+      sed -i -e 's/\/etc/%(ENV_SNAP_DATA)s\/etc/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/supervisor/*
+      sed -i -e 's/\/var\/log/%(ENV_SNAP_DATA)s\/var\/log/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/supervisor/*
+      sed -i '4d' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/supervisor/*
+      sed -i -e 's/user=ds/;user=ds/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/supervisor/*
+      # editing etc/onlyoffice/documentserver/nginx/ds...
+      sed -i -e 's/etc/snap\/onlyoffice-ds\/current\/etc/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/nginx/ds.conf
+      mkdir -p $SNAPCRAFT_PART_INSTALL/etc/nginx/conf.d
+      cp $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/nginx/ds.conf $SNAPCRAFT_PART_INSTALL/etc/nginx/conf.d/ds.conf
+      sed -i -e 's/\(var\/log\/onlyoffice\/documentserver\/nginx.error.log\)/var\/snap\/onlyoffice-ds\/current\/\1/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/nginx/includes/ds-common.conf
+      sed -i -e 's/var\/www/snap\/onlyoffice-ds\/current\/var\/www/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/nginx/includes/ds-docservice.conf
+      sed -i -e 's/var\/lib/var\/snap\/onlyoffice-ds\/common\/var\/lib/g' $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/nginx/includes/ds-docservice.conf
+      # editing documentserver && documentserver-example
+      mv $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/production-linux.json $SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/production-linux.json-old
+      # copy lib
+      cp $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/FileConverter/bin/*.so $SNAPCRAFT_PART_INSTALL/lib/
+      cp $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/FileConverter/bin/libicuuc.so.58 $SNAPCRAFT_PART_INSTALL/lib/
+      cp $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/FileConverter/bin/libicudata.so.58 $SNAPCRAFT_PART_INSTALL/lib/
+      # documentserver-generate-allfonts.sh
+      mkdir -p $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/fonts
+      DIR="$SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver"
+      "$DIR/server/tools/allfontsgen" --input="$DIR/core-fonts"  --allfonts-web="$DIR/sdkjs/common/AllFonts.js"  --allfonts="$DIR/server/FileConverter/bin/AllFonts.js"  --images="$DIR/sdkjs/common/Images"   --selection="$DIR/server/FileConverter/bin/font_selection.bin"  --output-web="$DIR/fonts"  --use-system="false"
+      "$DIR/server/tools/allthemesgen" --converter-dir="$DIR/server/FileConverter/bin" --src="$DIR/sdkjs/slide/themes" --output="$DIR/sdkjs/common/Images"
+
+
+  node:
+    plugin: dump
+    source: https://nodejs.org/dist/v8.12.0/node-v8.12.0-linux-x64.tar.gz
+    override-build: |
+      snapcraftctl build
+      rm -f $SNAPCRAFT_PART_INSTALL/README.md
+
+  nginx:
+    plugin: dump
+    source: https://github.com/seanlano/nginx.git
+    source-type: git
+    source-tag: release-1.13.6_snap-fix
+    stage-packages:
+      - supervisor
+      - redis-server
+    override-build: |
+      snapcraftctl build
+      wget https://www.zlib.net/fossils/zlib-1.2.11.tar.gz
+      wget https://www.openssl.org/source/openssl-1.0.2t.tar.gz
+      mkdir zlib
+      mkdir openssl
+      tar xvf zlib-1.2.11.tar.gz --strip-components 1 -C zlib/
+      tar xvf openssl-1.0.2t.tar.gz --strip-components 1 -C openssl/
+      wget https://ftp.pcre.org/pub/pcre/pcre-8.41.tar.bz2 -O pcre.tar.bz2
+      mkdir pcre
+      tar xvf pcre.tar.bz2 --strip-components 1 -C pcre/
+      auto/configure --prefix=/snap/onlyoffice-ds/current/etc/nginx --sbin-path=/snap/onlyoffice-ds/current/usr/sbin --conf-path=/var/snap/onlyoffice-ds/current/etc/nginx/nginx.conf \
+      --error-log-path=/var/snap/onlyoffice-ds/current/var/log/nginx/error.log --http-log-path=/var/snap/onlyoffice-ds/current/var/log/nginx/access.log --pid-path=/var/snap/onlyoffice-ds/current/var/run/nginx.pid \
+      --lock-path=/var/snap/onlyoffice-ds/current/var/lock/nginx.lock --http-client-body-temp-path=/var/snap/onlyoffice-ds/current/var/cache/nginx/client_temp --http-proxy-temp-path=/var/snap/onlyoffice-ds/current/var/cache/nginx/proxy_temp \
+      --http-fastcgi-temp-path=/var/snap/onlyoffice-ds/current/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/snap/onlyoffice-ds/current/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/snap/onlyoffice-ds/current/var/cache/nginx/scgi_temp \
+      --with-http_secure_link_module --with-http_ssl_module --with-mail_ssl_module --with-openssl=openssl --with-http_v2_module
+      make
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      cp objs/nginx $SNAPCRAFT_PART_INSTALL/bin/nginx
+      mkdir -p $SNAPCRAFT_PART_INSTALL/etc/nginx
+      cp conf/* $SNAPCRAFT_PART_INSTALL/etc/nginx
+      mkdir -p $SNAPCRAFT_PART_INSTALL/etc/nginx/conf.d
+      rm -f etc/nginx/modules
+      rm $SNAPCRAFT_PART_INSTALL/etc/nginx/nginx.conf
+      sed -i -e 's/\/var/%(ENV_SNAP_DATA)s\/var/g' $SNAPCRAFT_PART_INSTALL/etc/supervisor/supervisord.conf
+      sed -i -e 's/\/etc/%(ENV_SNAP_DATA)s\/etc/g' $SNAPCRAFT_PART_INSTALL/etc/supervisor/supervisord.conf
+      sed -i '3,5d' $SNAPCRAFT_PART_INSTALL/etc/supervisor/supervisord.conf
+      sed -i -e 's/usr\/sbin\/nginx/snap\/onlyoffice-ds\/current\/usr\/sbin\/nginx/g' $SNAPCRAFT_PART_INSTALL/etc/init.d/supervisor
+      sed -i -e 's/etc/snap\/onlyoffice-ds\/current\/etc/g' $SNAPCRAFT_PART_INSTALL/etc/init.d/supervisor
+      sed -i -e 's/lib/snap\/onlyoffice-ds\/current\/lib/g' $SNAPCRAFT_PART_INSTALL/etc/init.d/supervisor
+    build-packages:
+      - libc6
+      - libgd3
+      - libgeoip1
+      - libssl1.0.0
+      - libxml2
+      - libxslt1.1
+      - build-essential
+      - autoconf
+      - automake
+      - pkg-config
+      - libtool
+      - libpcre3-dev
+      - libpcre++-dev
+      - zlibc 
+      - zlib1g
+      - zlib1g-dev
+      - wget
+  
+  boost:
+    plugin: dump
+    source: https://github.com/kyrofa/boost_tarball/raw/master/boost_1_59_0.tar.gz
+    stage:
+      - boost/
+    prime:
+      - -*
+
+  mysql:
+    plugin: cmake
+    source: https://github.com/mysql/mysql-server.git
+    source-tag: mysql-5.7.27
+    source-depth: 1
+    override-pull: |
+      snapcraftctl pull
+      git apply $SNAPCRAFT_STAGE/mysql-support-compile-time-disabling-of-setpriority.patch
+    after: [boost, patches]
+    configflags:
+      - -WITH_LIBWRAP=ON
+      - -DMYSQL_TCP_PORT=3306
+      - -DWITH_BOOST=$SNAPCRAFT_STAGE
+      - -DWITH_INNODB_PAGE_CLEANER_PRIORITY=OFF
+      - -DCMAKE_INSTALL_PREFIX=/
+      - -DBUILD_CONFIG=mysql_release
+      - -DWITH_UNIT_TESTS=OFF
+      - -DWITH_EMBEDDED_SERVER=OFF
+      - -DWITH_ARCHIVE_STORAGE_ENGINE=OFF
+      - -DWITH_BLACKHOLE_STORAGE_ENGINE=OFF
+      - -DWITH_FEDERATED_STORAGE_ENGINE=OFF
+      - -DWITH_PARTITION_STORAGE_ENGINE=OFF
+      - -DINSTALL_MYSQLTESTDIR=
+    stage-packages:
+      - libaio1
+    build-packages:
+      - wget
+      - g++
+      - cmake
+      - bison
+      - libncurses5-dev
+      - libaio-dev
+    stage:
+      # Remove scripts that we'll be replacing with our own
+      - -support-files/mysql.server
+      - -COPYING
+    prime:
+      # Remove scripts that we'll be replacing with our own
+      - -support-files/mysql.server
+
+      # Remove unused binaries that waste space
+      - -bin/innochecksum
+      - -bin/lz4_decompress
+      - -bin/myisam*
+      - -bin/mysqladmin
+      - -bin/mysqlbinlog
+      - -bin/mysql_client_test
+      - -bin/mysql_config*
+      - -bin/mysqld_multi
+      - -bin/mysqlimport
+      - -bin/mysql_install_db
+      - -bin/mysql_plugin
+      - -bin/mysqlpump
+      - -bin/mysql_secure_installation
+      - -bin/mysqlshow
+      - -bin/mysqlslap
+      - -bin/mysql_ssl_rsa_setup
+      - -bin/mysqltest
+      - -bin/mysql_tzinfo_to_sql
+      - -bin/perror
+      - -bin/replace
+      - -bin/resolveip
+      - -bin/resolve_stack_dump
+      - -bin/zlib_decompress
+
+  mysql-customizations:
+    plugin: dump
+    source: src/mysql/
+
+  patches:
+    source: src/patches
+    plugin: dump
+    prime:
+      - -*
+  common:
+    plugin: dump
+    source: src/common/
+
+
+  starter:
+    plugin: dump
+    source: ./config/
+    organize:
+      production-linux.json: etc/onlyoffice/documentserver/production-linux.json
+      nginx.conf: etc/nginx/nginx.conf
+      local.json: etc/onlyoffice/documentserver/local.json
+
+  bin:
+    plugin: dump
+    source: ./bin/
+    organize:
+      documentserver-start.sh: usr/sbin/documentserver-start.sh
+      rabbitmq-env-start.sh: usr/lib/rabbitmq/bin/rabbitmq-env-start.sh
+      nginx-start.sh: usr/sbin/nginx-start.sh
