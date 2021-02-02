@@ -71,7 +71,7 @@ parts:
 
   onlyoffice-ds:
     plugin: dump
-    source: http://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver_amd64.deb
+    source: https://github.com/ONLYOFFICE/DocumentServer/releases/download/ONLYOFFICE-DocumentServer-5.4.0-2/onlyoffice-documentserver_amd64.deb
     source-type: deb
     stage-packages:
       - libxml2
