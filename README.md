@@ -16,7 +16,7 @@ The editors allow you to create, edit, save and export text, spreadsheet and pre
 
 ## Installing ONLYOFFICE Document Server using Snapcraft command line tool
 
-ONLYOFFICE Document Server is available in [Snapcraft store](https://snapcraft.io/onlyoffice-ds) as a snap package. A snap contains all the dependencies to run the application. To use it, all you need is snapd, a system to install and manage snaps. Snapd is included into most of modern distributions. You only need to either enable or install it. See the [official snap project page](https://docs.snapcraft.io/core/install) for the snapd installation instructions.
+ONLYOFFICE Document Server is available in [Snapcraft store](https://snapcraft.io/oo-ds-test) as a snap package. A snap contains all the dependencies to run the application. To use it, all you need is snapd, a system to install and manage snaps. Snapd is included into most of modern distributions. You only need to either enable or install it. See the [official snap project page](https://docs.snapcraft.io/core/install) for the snapd installation instructions.
 
 For example, to install snapd under Ubuntu you need to run the commands:
 
@@ -28,7 +28,7 @@ sudo apt install snapd
 Now the editors can be easily installed using the following command:
 
 ```
-snap install onlyoffice-ds --beta
+snap install oo-ds-test --beta
 ```
 
 ## Running ONLYOFFICE Document Server
@@ -42,7 +42,7 @@ You can check status of ONLYOFFICE Document Server [here](http://localhost/welco
 To remove the snap containing ONLYOFFICE editors use the following command:
 
 ```
-snap remove onlyoffice-ds
+snap remove oo-ds-test
 ```
 
 ## Configuration
@@ -52,7 +52,7 @@ snap remove onlyoffice-ds
 By default, the snap will listen on port 80. If you'd like to change the HTTP port (say, to port 8888), run:
 
 ```
-sudo snap set onlyoffice-ds onlyoffice.ds-port=8888
+sudo snap set oo-ds-test onlyoffice.ds-port=8888
 ```
 
 ### MySQL port configuration
@@ -60,7 +60,7 @@ sudo snap set onlyoffice-ds onlyoffice.ds-port=8888
 By default, MySQL uses port 3306. You can also change the database port, using the command:
 
 ```
-sudo snap set onlyoffice-ds onlyoffice.db-port=3307
+sudo snap set oo-ds-test onlyoffice.db-port=3307
 ```
 
 ### Running ONLYOFFICE Document Server using HTTPS
@@ -111,30 +111,30 @@ openssl dhparam -out dhparam.pem 2048
 
 Out of the four files generated above, you need to install the `onlyoffice.key`, `onlyoffice.crt` and `dhparam.pem` files at the onlyoffice server. The CSR file is not needed, but do make sure you safely backup the file (in case you ever need it again).
 
-The default path that the onlyoffice application is configured to look for the SSL certificates is at `/var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/certs`.
+The default path that the onlyoffice application is configured to look for the SSL certificates is at `/var/snap/oo-ds-test/current/var/www/onlyoffice/Data/certs`.
 
-The `/var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/` path is the path of the data store, which means that you have to copy the files into it.
+The `/var/snap/oo-ds-test/current/var/www/onlyoffice/Data/` path is the path of the data store, which means that you have to copy the files into it.
 
 ```bash
-sudo cp onlyoffice.key /var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/certs/
-sudo cp onlyoffice.crt /var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/certs/
-sudo cp dhparam.pem /var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/certs/
+sudo cp onlyoffice.key /var/snap/oo-ds-test/current/var/www/onlyoffice/Data/certs/
+sudo cp onlyoffice.crt /var/snap/oo-ds-test/current/var/www/onlyoffice/Data/certs/
+sudo cp dhparam.pem /var/snap/oo-ds-test/current/var/www/onlyoffice/Data/certs/
 ```
 
 Then you must restart ONLYOFFICE Document Server to work on ssl, run:
 
 ```bash
-sudo snap restart onlyoffice-ds
+sudo snap restart oo-ds-test
 ```
 
 You are now just one step away from having our application secured.
 
-If you want to return ONLYOFFICE Document Server to work on HTTP, delete files from the `/var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/certs` and restart ONLYOFFICE Document Server.
+If you want to return ONLYOFFICE Document Server to work on HTTP, delete files from the `/var/snap/oo-ds-test/current/var/www/onlyoffice/Data/certs` and restart ONLYOFFICE Document Server.
 
 ```bash
-sudo rm /var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/certs/onlyoffice.*
-sudo rm /var/snap/onlyoffice-ds/current/var/www/onlyoffice/Data/certs/dhparam.pem
-sudo snap restart onlyoffice-ds
+sudo rm /var/snap/oo-ds-test/current/var/www/onlyoffice/Data/certs/onlyoffice.*
+sudo rm /var/snap/oo-ds-test/current/var/www/onlyoffice/Data/certs/dhparam.pem
+sudo snap restart oo-ds-test
 ```
 
 #### JSON Web Token
@@ -146,7 +146,7 @@ sudo snap restart onlyoffice-ds
 If you'd like to change the JSON Web Token parameters, run:
 
 ```
-sudo snap set onlyoffice-ds onlyoffice.key=value
+sudo snap set oo-ds-test onlyoffice.key=value
 ```
 
 ## Project Information
