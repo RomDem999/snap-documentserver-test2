@@ -162,7 +162,7 @@ If you'd like to change the JSON Web Token parameters, run:
 By default, example is not enabled. You can enable the example, using the command:
 
 ```
-# snap set onlyoffice-ds onlyoffice.example-enabled=true
+# snap set oo-ds-test onlyoffice.example-enabled=true
 ```
 
 ## Project Information
