@@ -1,7 +1,7 @@
 name: oo-ds-test
 version: "6.3.0"
 summary: "An online office suite that allowing to create, view and edit documents."
-description: "ONLYOFFICE Document Server is an online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time."
+description: "OO Document Server is an online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time."
 icon: snap/icons/asc-de-256.png
 grade: stable
 confinement: strict
