@@ -152,7 +152,7 @@ By default, HTTPS SSL port is 443. If you'd like to change it (say, to port 444)
 By default, document server is prevented from using an unauthorized storage. To allow it, run:
 
 ```
-# snap set onlyoffice-ds onlyoffice.use-unautorized-storage=true
+# snap set oo-ds-test onlyoffice.use-unautorized-storage=true
 ```
 
 #### JSON Web Token
@@ -183,8 +183,8 @@ Code repository: [https://github.com/ONLYOFFICE/DocumentServer](https://github.c
 
 ## User Feedback and Support
 
-If you have any problems with or questions about ONLYOFFICE Document Server, please visit our official forum to find answers to your questions: [dev.onlyoffice.org][1] or you can ask and answer ONLYOFFICE development questions on [Stack Overflow][3].
+If you have any problems with or questions about ONLYOFFICE Document Server, please visit our official forum to find answers to your questions: [forum.onlyoffice.com][1] or you can ask and answer ONLYOFFICE development questions on [Stack Overflow][3].
 
-  [1]: http://dev.onlyoffice.org
+  [1]: https://forum.onlyoffice.com
   [2]: https://github.com/ONLYOFFICE/DocumentServer
   [3]: http://stackoverflow.com/questions/tagged/onlyoffice

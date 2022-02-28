@@ -9,7 +9,6 @@ mkdir -p $SNAP_DATA/var/log/onlyoffice/documentserver/docservice/
 mkdir -p $SNAP_DATA/var/log/onlyoffice/documentserver/converter/
 mkdir -p $SNAP_DATA/var/log/onlyoffice/documentserver/gc/
 mkdir -p $SNAP_DATA/var/log/onlyoffice/documentserver/metrics/
-mkdir -p $SNAP_DATA/var/log/onlyoffice/documentserver/spellchecker/
 mkdir -p $SNAP_DATA/var/log/onlyoffice/documentserver-example/
 mkdir -p $SNAP_DATA/var/lib/onlyoffice/documentserver-example/files/
 
@@ -21,8 +20,6 @@ touch $SNAP_DATA/var/log/onlyoffice/documentserver/gc/out.log
 touch $SNAP_DATA/var/log/onlyoffice/documentserver/gc/err.log
 touch $SNAP_DATA/var/log/onlyoffice/documentserver/metrics/out.log
 touch $SNAP_DATA/var/log/onlyoffice/documentserver/metrics/err.log
-touch $SNAP_DATA/var/log/onlyoffice/documentserver/spellchecker/out.log
-touch $SNAP_DATA/var/log/onlyoffice/documentserver/spellchecker/err.log
 touch $SNAP_DATA/var/log/onlyoffice/documentserver-example/out.log
 touch $SNAP_DATA/var/log/onlyoffice/documentserver-example/err.log
 
@@ -35,9 +32,9 @@ fi
 
 USE_UNAUTHORIZED_STORAGE_ENABLED=$(snapctl get onlyoffice.use-unautorized-storage)
 if [ "${USE_UNAUTHORIZED_STORAGE_ENABLED}" == "true" ]; then
-    sed -i -e 's/"rejectUnauthorized": true/"rejectUnauthorized": false/' /var/snap/onlyoffice-ds/current/etc/onlyoffice/documentserver/local.json
+    sed -i -e 's/"rejectUnauthorized": true/"rejectUnauthorized": false/' /var/snap/oo-ds-test/current/etc/onlyoffice/documentserver/local.json
 else
-    sed -i -e 's/"rejectUnauthorized": false/"rejectUnauthorized": true/' /var/snap/onlyoffice-ds/current/etc/onlyoffice/documentserver/local.json
+    sed -i -e 's/"rejectUnauthorized": false/"rejectUnauthorized": true/' /var/snap/oo-ds-test/current/etc/onlyoffice/documentserver/local.json
 fi
 
 export LC_ALL=C.UTF-8

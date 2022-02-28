@@ -1,5 +1,5 @@
 name: oo-ds-test
-version: "6.3.0"
+version: "7.0.1"
 summary: "An online office suite that allowing to create, view and edit documents."
 description: "OO Document Server is an online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time."
 icon: snap/icons/asc-de-256.png
@@ -72,7 +72,7 @@ parts:
 
   server:
     plugin: dump
-    source: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-6.3.0.tar.gz
+    source: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-7.0.1.tar.gz
     stage-packages:
       - libxml2
       - fonts-dejavu
@@ -97,19 +97,8 @@ parts:
         /usr/lib/update-notifier/package-data-downloader
       fi
       cp -r /usr/share/fonts/truetype/msttcorefonts $SNAPCRAFT_PART_INSTALL/usr/share/fonts/truetype
-      rm -r $SNAPCRAFT_PART_INSTALL/core-fonts
-      rm -r $SNAPCRAFT_PART_INSTALL/sdkjs
-      rm -r $SNAPCRAFT_PART_INSTALL/sdkjs-plugins
-      rm -r $SNAPCRAFT_PART_INSTALL/server
-      rm -r $SNAPCRAFT_PART_INSTALL/web-apps
-      rm -r $SNAPCRAFT_PART_INSTALL/example
       DIR="$SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver"
-      mkdir -p $DIR
-      mkdir -p $DIR-example
-      rm -r ./server/welcome
-      mv ./example/* $DIR-example
-      rm -r ./example
-      cp -r * $DIR
+      rm -r $DIR/server/welcome
       DIR_ETC="$SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver"
       mkdir -p $DIR_ETC
       mv $DIR/server/Common/config/* $DIR_ETC
@@ -131,6 +120,10 @@ parts:
       ln -s -f $OUTDIR/sdkjs/slide/themes $DIR/sdkjs/slide/themes
       ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail.png $DIR/sdkjs/common/Images/themes_thumbnail.png
       ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail@2x.png $DIR/sdkjs/common/Images/themes_thumbnail@2x.png
+      #package version
+      BUILD_VERSION=`cat var/www/onlyoffice/documentserver/server/Common/sources/commondefines.js | grep "const buildVersion" | grep -o "[0-9.]*"`
+      BUILD_NUMBER=`cat var/www/onlyoffice/documentserver/server/Common/sources/commondefines.js | grep "const buildNumber" | grep -o "[0-9]*"`
+      echo $BUILD_VERSION-$BUILD_NUMBER > $SNAPCRAFT_STAGE/version
 
   node:
     plugin: dump
@@ -154,9 +147,9 @@ parts:
       mkdir openssl
       tar xvf zlib-1.2.11.tar.gz --strip-components 1 -C zlib/
       tar xvf openssl-1.0.2t.tar.gz --strip-components 1 -C openssl/
-      wget https://ftp.pcre.org/pub/pcre/pcre-8.41.tar.bz2 -O pcre.tar.bz2
+      wget https://osdn.net/projects/sfnet_pcre/downloads/pcre/8.41/pcre-8.41.tar.gz -O pcre.tar.gz
       mkdir pcre
-      tar xvf pcre.tar.bz2 --strip-components 1 -C pcre/
+      tar xvf pcre.tar.gz --strip-components 1 -C pcre/
       auto/configure --prefix=/snap/oo-ds-test/current/etc/nginx --sbin-path=/snap/oo-ds-test/current/usr/sbin --conf-path=/var/snap/oo-ds-test/current/etc/nginx/nginx.conf \
       --error-log-path=/var/snap/oo-ds-test/current/var/log/nginx/error.log --http-log-path=/var/snap/oo-ds-test/current/var/log/nginx/access.log --pid-path=/var/snap/oo-ds-test/current/var/run/nginx.pid \
       --lock-path=/var/snap/oo-ds-test/current/var/lock/nginx.lock --http-client-body-temp-path=/var/snap/oo-ds-test/current/var/cache/nginx/client_temp --http-proxy-temp-path=/var/snap/oo-ds-test/current/var/cache/nginx/proxy_temp \
@@ -281,6 +274,50 @@ parts:
     plugin: dump
     source: src/common/
 
+  ds-package:
+    after:
+      - server
+    plugin: nil
+    source: https://github.com/ONLYOFFICE/document-server-package.git
+    source-type: git
+    override-build: |
+      snapcraftctl build
+      PACKAGE_VERSION=`cat $SNAPCRAFT_STAGE/version`
+      #welcome page
+      mkdir -p $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/welcome
+      cp -r common/documentserver-example/welcome/css $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/welcome
+      cp common/documentserver-example/welcome/linux.html $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/welcome/index.html
+      sed -i -e 's/{{OFFICIAL_PRODUCT_NAME}}/Community Edition/' $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/welcome/index.html
+      sed -i -e 's/sudo supervisorctl start ds:example/sudo snap set oo-ds-test onlyoffice.example-enabled=true/' $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/welcome/index.html
+      sed -i -e '/<h3>Add it to the autostart/d' $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/welcome/index.html
+      sed -i -e '/<pre>sudo sed/d' $SNAPCRAFT_PART_INSTALL/var/www/onlyoffice/documentserver/server/welcome/index.html
+      #nginx configs
+      NGINX_DIR=$SNAPCRAFT_PART_INSTALL/etc/onlyoffice/documentserver/nginx
+      mkdir -p $NGINX_DIR/includes
+      ##ds.conf.tmpl
+      cp common/documentserver/nginx/ds.conf.tmpl.m4 $NGINX_DIR/ds.conf.tmpl
+      sed -i -e 's/M4_NGINX_CONF/\/snap\/oo-ds-test\/current\/etc\/onlyoffice\/documentserver\/nginx\/includes/' $NGINX_DIR/ds.conf.tmpl
+      sed -i -e 's/80/DS_PORT/' $NGINX_DIR/ds.conf.tmpl
+      ##ds-ssl.conf.tmpl
+      cp common/documentserver/nginx/ds-ssl.conf.tmpl.m4 $NGINX_DIR/ds-ssl.conf.tmpl
+      sed -i -e 's/M4_NGINX_CONF/\/snap\/oo-ds-test\/current\/etc\/onlyoffice\/documentserver\/nginx\/includes/' $NGINX_DIR/ds-ssl.conf.tmpl
+      sed -i -e 's/80/DS_PORT/' $NGINX_DIR/ds-ssl.conf.tmpl
+      sed -i -e 's/443/DSS_PORT/' $NGINX_DIR/ds-ssl.conf.tmpl
+      ##ds-common.conf
+      cp common/documentserver/nginx/includes/ds-common.conf.m4 $NGINX_DIR/includes/ds-common.conf
+      sed -i -e 's/M4_NGINX_LOG/\/var\/snap\/oo-ds-test\/current\/var\/log\/nginx/' $NGINX_DIR/includes/ds-common.conf
+      ##ds-docservice.conf
+      cp common/documentserver/nginx/includes/ds-docservice.conf.m4 $NGINX_DIR/includes/ds-docservice.conf
+      sed -i -e 's/M4_DS_ROOT/\/snap\/oo-ds-test\/current\/var\/www\/onlyoffice\/documentserver/' $NGINX_DIR/includes/ds-docservice.conf
+      sed -i -e "s/M4_PACKAGE_VERSION/$PACKAGE_VERSION/" $NGINX_DIR/includes/ds-docservice.conf
+      sed -i -e 's/M4_DEV_NULL/\/dev\/null/' $NGINX_DIR/includes/ds-docservice.conf
+      sed -i -e 's/M4_DS_FILES/\/var\/snap\/oo-ds-test\/common\/var\/lib\/onlyoffice\/documentserver/' $NGINX_DIR/includes/ds-docservice.conf
+      ##http-common.conf
+      cp common/documentserver/nginx/includes/http-common.conf.m4 $NGINX_DIR/includes/http-common.conf
+      ##ds-example.conf
+      cp common/documentserver-example/nginx/includes/ds-example.conf.m4 $NGINX_DIR/includes/ds-example.conf
+      sed -i -e 's/M4_PLATFORM/index/' $NGINX_DIR/includes/ds-example.conf
+      sed -i -e 's/M4_DS_EXAMLE/\/snap\/oo-ds-test\/current\/var\/www\/onlyoffice\/documentserver\/server/' $NGINX_DIR/includes/ds-example.conf
 
   starter:
     plugin: dump
@@ -290,11 +327,8 @@ parts:
       local.json: etc/onlyoffice/documentserver/local.json
       ds-docservice.conf: etc/supervisor/conf.d/ds-docservice.conf
       ds-converter.conf: etc/supervisor/conf.d/ds-converter.conf
-      ds-spellchecker.conf: etc/supervisor/conf.d/ds-spellchecker.conf
       ds-example.conf: etc/supervisor/conf.d/ds-example.conf
       ds.conf: etc/supervisor/conf.d/ds.conf
-      ds.conf.tmpl: etc/onlyoffice/documentserver/nginx/ds.conf.tmpl
-      ds-ssl.conf.tmpl: etc/onlyoffice/documentserver/nginx/ds-ssl.conf.tmpl
 
   bin:
     plugin: dump
@@ -305,12 +339,3 @@ parts:
       nginx-start.sh: usr/sbin/nginx-start.sh
       generate-all-fonts.sh: usr/sbin/generate-all-fonts.sh
 
-  welcome:
-    plugin: dump
-    source: ./welcome/
-    organize:
-      index.html: var/www/onlyoffice/documentserver/server/welcome/index.html
-      css/favicon.ico: var/www/onlyoffice/documentserver/server/welcome/css/favicon.ico
-      css/logo.png: var/www/onlyoffice/documentserver/server/welcome/css/logo.png
-      css/logo@2x.png: var/www/onlyoffice/documentserver/server/welcome/css/logo@2x.png
-      css/stylesheet.css: var/www/onlyoffice/documentserver/server/welcome/css/stylesheet.css
