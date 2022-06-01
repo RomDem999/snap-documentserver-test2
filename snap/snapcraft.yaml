@@ -1,5 +1,5 @@
 name: oo-ds-test
-version: "7.0.1"
+version: "7.1.0"
 summary: "An online office suite that allowing to create, view and edit documents."
 description: "OO Document Server is an online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time."
 icon: snap/icons/asc-de-256.png
@@ -8,6 +8,12 @@ confinement: strict
 base: core18
 architectures:
   - amd64
+
+layout:
+  /etc/my.cnf:
+    bind-file: $SNAP_DATA/etc/my.cnf
+  /etc/my.cnf.d:
+    bind: $SNAP_DATA/etc/my.cnf.d
 
 apps:
   documentserver:
@@ -72,7 +78,7 @@ parts:
 
   server:
     plugin: dump
-    source: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-7.0.1.tar.gz
+    source: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-7.1.0_x86_64.tar.gz
     stage-packages:
       - libxml2
       - fonts-dejavu
@@ -127,7 +133,7 @@ parts:
 
   node:
     plugin: dump
-    source: https://nodejs.org/dist/v10.21.0/node-v10.21.0-linux-x64.tar.gz
+    source: https://nodejs.org/dist/v16.15.0/node-v16.15.0-linux-x64.tar.gz
     override-build: |
       snapcraftctl build
       rm -f $SNAPCRAFT_PART_INSTALL/README.md
@@ -296,13 +302,17 @@ parts:
       mkdir -p $NGINX_DIR/includes
       ##ds.conf.tmpl
       cp common/documentserver/nginx/ds.conf.tmpl.m4 $NGINX_DIR/ds.conf.tmpl
-      sed -i -e 's/M4_NGINX_CONF/\/snap\/oo-ds-test\/current\/etc\/onlyoffice\/documentserver\/nginx\/includes/' $NGINX_DIR/ds.conf.tmpl
+      sed -i -e 's/M4_NGINX_CONF/\/var\/snap\/oo-ds-test\/current\/etc\/onlyoffice\/documentserver\/nginx\/includes/' $NGINX_DIR/ds.conf.tmpl
       sed -i -e 's/80/DS_PORT/' $NGINX_DIR/ds.conf.tmpl
+      sed -i -r 's/(server_tokens off;)/\1\n #allow 127.0.0.1;\n #deny all;/' \
+        $NGINX_DIR/ds.conf.tmpl
       ##ds-ssl.conf.tmpl
       cp common/documentserver/nginx/ds-ssl.conf.tmpl.m4 $NGINX_DIR/ds-ssl.conf.tmpl
-      sed -i -e 's/M4_NGINX_CONF/\/snap\/oo-ds-test\/current\/etc\/onlyoffice\/documentserver\/nginx\/includes/' $NGINX_DIR/ds-ssl.conf.tmpl
+      sed -i -e 's/M4_NGINX_CONF/\/var\/snap\/oo-ds-test\/current\/etc\/onlyoffice\/documentserver\/nginx\/includes/' $NGINX_DIR/ds-ssl.conf.tmpl
       sed -i -e 's/80/DS_PORT/' $NGINX_DIR/ds-ssl.conf.tmpl
       sed -i -e 's/443/DSS_PORT/' $NGINX_DIR/ds-ssl.conf.tmpl
+      sed -i -r 's/(server_tokens off;)/\1\n #allow 127.0.0.1;\n #deny all;/' \
+        $NGINX_DIR/ds-ssl.conf.tmpl
       ##ds-common.conf
       cp common/documentserver/nginx/includes/ds-common.conf.m4 $NGINX_DIR/includes/ds-common.conf
       sed -i -e 's/M4_NGINX_LOG/\/var\/snap\/oo-ds-test\/current\/var\/log\/nginx/' $NGINX_DIR/includes/ds-common.conf
