@@ -365,7 +365,7 @@ token_onlyoffice_loopback()
 	set_onlyoffice_loopback "$onlyoffice_loopback"
 	set_previous_onlyoffice_loopback "$onlyoffice_loopback"
 
-	snapctl restart onlyoffice-ds.nginx
+	snapctl restart oo-ds-test.nginx
 }
 
 set_onlyoffice_loopback()
