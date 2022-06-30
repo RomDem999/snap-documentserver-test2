@@ -51,7 +51,7 @@ apps:
     plugs: [network, network-bind]
 
   mysqldump:
-    command: mysqldump --defaults-file=$SNAP_DATA/mysql/root.ini --lock-tables onlyoffice
+    command: mysqldump --lock-tables onlyoffice
     plugs: [network, network-bind]
 
 hooks:
