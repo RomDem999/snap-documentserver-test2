@@ -1,5 +1,5 @@
 name: oo-ds-test
-version: "7.1.0"
+version: "7.1.1"
 summary: "An online office suite that allowing to create, view and edit documents."
 description: "OO Document Server is an online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time."
 icon: snap/icons/asc-de-256.png
@@ -54,7 +54,7 @@ apps:
     plugs: [network, network-bind]
 
   mysqldump:
-    command: mysqldump --lock-tables onlyoffice
+    command: mysqldump --defaults-file=$SNAP_DATA/mysql/root.ini --lock-tables onlyoffice
     plugs: [network, network-bind]
 
 hooks:
@@ -83,8 +83,8 @@ parts:
   server:
     plugin: dump
     source: 
-      - on amd64: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-7.1.0_x86_64.tar.gz
-      - on arm64: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-7.1.0_aarch64.tar.gz
+      - on amd64: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-7.1.1_x86_64.tar.gz
+      - on arm64: https://download.onlyoffice.com/install/documentserver/linux/onlyoffice-documentserver-7.1.1_aarch64.tar.gz
     stage-packages:
       - libxml2
       - fonts-dejavu
@@ -127,14 +127,35 @@ parts:
       ln -s -f $OUTDIR/server/FileConverter/bin/AllFonts.js $DIR/server/FileConverter/bin/AllFonts.js
       ln -s -f $OUTDIR/server/FileConverter/bin/font_selection.bin $DIR/server/FileConverter/bin/font_selection.bin
       ln -s -f $OUTDIR/fonts $DIR/fonts
-      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail.png $DIR/sdkjs/common/Images/fonts_thumbnail.png
-      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@2x.png $DIR/sdkjs/common/Images/fonts_thumbnail@2x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail.png              $DIR/sdkjs/common/Images/fonts_thumbnail.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@1.25x.png        $DIR/sdkjs/common/Images/fonts_thumbnail@1.25x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@1.5x.png         $DIR/sdkjs/common/Images/fonts_thumbnail@1.5x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@1.75x.png        $DIR/sdkjs/common/Images/fonts_thumbnail@1.75x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@2x.png           $DIR/sdkjs/common/Images/fonts_thumbnail@2x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea.png           $DIR/sdkjs/common/Images/fonts_thumbnail_ea.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@1.25x.png     $DIR/sdkjs/common/Images/fonts_thumbnail_ea@1.25x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@1.5x.png      $DIR/sdkjs/common/Images/fonts_thumbnail_ea@1.5x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@1.75x.png     $DIR/sdkjs/common/Images/fonts_thumbnail_ea@1.75x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@2x.png        $DIR/sdkjs/common/Images/fonts_thumbnail_ea@2x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail.png.bin          $DIR/sdkjs/common/Images/fonts_thumbnail.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@1.25x.png.bin    $DIR/sdkjs/common/Images/fonts_thumbnail@1.25x.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@1.5x.png.bin     $DIR/sdkjs/common/Images/fonts_thumbnail@1.5x.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@1.75x.png.bin    $DIR/sdkjs/common/Images/fonts_thumbnail@1.75x.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail@2x.png.bin       $DIR/sdkjs/common/Images/fonts_thumbnail@2x.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea.png.bin       $DIR/sdkjs/common/Images/fonts_thumbnail_ea.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@1.25x.png.bin $DIR/sdkjs/common/Images/fonts_thumbnail_ea@1.25x.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@1.5x.png.bin  $DIR/sdkjs/common/Images/fonts_thumbnail_ea@1.5x.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@1.75x.png.bin $DIR/sdkjs/common/Images/fonts_thumbnail_ea@1.75x.png.bin
+      ln -s -f $OUTDIR/sdkjs/common/Images/fonts_thumbnail_ea@2x.png.bin    $DIR/sdkjs/common/Images/fonts_thumbnail_ea@2x.png.bin
       ln -s -f $OUTDIR/sdkjs/common/AllFonts.js $DIR/sdkjs/common/AllFonts.js
       #themes
       mv $DIR/sdkjs/slide/themes $DIR/sdkjs/slide/themes_backup
       ln -s -f $OUTDIR/sdkjs/slide/themes $DIR/sdkjs/slide/themes
-      ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail.png $DIR/sdkjs/common/Images/themes_thumbnail.png
-      ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail@2x.png $DIR/sdkjs/common/Images/themes_thumbnail@2x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail.png       $DIR/sdkjs/common/Images/themes_thumbnail.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail@1.25x.png $DIR/sdkjs/common/Images/themes_thumbnail@1.25x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail@1.5x.png  $DIR/sdkjs/common/Images/themes_thumbnail@1.5x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail@1.75x.png $DIR/sdkjs/common/Images/themes_thumbnail@1.75x.png
+      ln -s -f $OUTDIR/sdkjs/common/Images/themes_thumbnail@2x.png    $DIR/sdkjs/common/Images/themes_thumbnail@2x.png
       #package version
       BUILD_VERSION=`cat var/www/onlyoffice/documentserver/server/Common/sources/commondefines.js | grep "const buildVersion" | grep -o "[0-9.]*"`
       BUILD_NUMBER=`cat var/www/onlyoffice/documentserver/server/Common/sources/commondefines.js | grep "const buildNumber" | grep -o "[0-9]*"`
