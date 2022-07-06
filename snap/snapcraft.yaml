@@ -12,7 +12,7 @@ architectures:
 
 layout:
   /etc/my.cnf:
-    bind-file: $SNAP_DATA/mysql/root.ini
+    bind-file: $SNAP_DATA/etc/my.cnf
   /etc/my.cnf.d:
     bind: $SNAP_DATA/etc/my.cnf.d
 
