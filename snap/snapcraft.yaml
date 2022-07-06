@@ -56,6 +56,10 @@ apps:
   mysqldump:
     command: mysqldump --defaults-file=$SNAP_DATA/mysql/root.ini --lock-tables onlyoffice
     plugs: [network, network-bind]
+    
+  generate-all-fonts:
+    command: usr/sbin/generate-all-fonts.sh
+    plugs: [desktop, unity7]
 
 hooks:
   configure:
