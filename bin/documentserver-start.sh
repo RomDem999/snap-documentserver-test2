@@ -51,6 +51,15 @@ else
         $NGINX_CONF_PATH/ds.conf.tmpl $NGINX_CONF_PATH/ds-ssl.conf.tmpl
 fi
 
+#check fonts
+FONTS_HASH_FILE=$SNAP_DATA/fonts-hash.md5
+FONTS_HASH_NEW=$(find /usr/share/fonts | md5sum | cut -f 1 -d ' ')
+FONTS_HASH_OLD=$(cat $FONTS_HASH_FILE)
+if [ "${FONTS_HASH_NEW}" != "${FONTS_HASH_OLD}" ]; then
+    echo "${FONTS_HASH_NEW}" > $FONTS_HASH_FILE
+    $SNAP/usr/sbin/generate-all-fonts.sh
+fi
+
 export LC_ALL=C.UTF-8
 
 $SNAP/usr/bin/python $SNAP/usr/bin/supervisord -n -c $SNAP_DATA/etc/supervisor/supervisord.conf
