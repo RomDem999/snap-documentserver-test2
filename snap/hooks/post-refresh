@@ -19,4 +19,3 @@ mv $SNAP_DATA/local.json $SNAP_DATA/etc/onlyoffice/documentserver/
 
 $SNAP/usr/sbin/generate-all-fonts.sh
 
-

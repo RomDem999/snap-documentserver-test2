@@ -51,6 +51,8 @@ else
         $NGINX_CONF_PATH/ds.conf.tmpl $NGINX_CONF_PATH/ds-ssl.conf.tmpl
 fi
 
+export LC_ALL=C.UTF-8
+
 #check fonts
 FONTS_HASH_FILE=$SNAP_DATA/fonts-hash.md5
 FONTS_HASH_NEW=$(find /usr/share/fonts | md5sum | cut -f 1 -d ' ')
@@ -60,6 +62,10 @@ if [ "${FONTS_HASH_NEW}" != "${FONTS_HASH_OLD}" ]; then
     $SNAP/usr/sbin/generate-all-fonts.sh
 fi
 
-export LC_ALL=C.UTF-8
+JWT_SECRET=$(snapctl get onlyoffice.jwt-secret)
+if [ "${JWT_SECRET}" == "default-jwt-secret" ]; then
+    RANDOM_STRING=$(od -An -N4 -i < /dev/urandom | md5sum | head -c 10)
+    snapctl set onlyoffice.jwt-secret=$RANDOM_STRING
+fi
 
 $SNAP/usr/bin/python $SNAP/usr/bin/supervisord -n -c $SNAP_DATA/etc/supervisor/supervisord.conf
