@@ -68,4 +68,9 @@ if [ "${JWT_SECRET}" == "default-jwt-secret" ]; then
     snapctl set onlyoffice.jwt-secret=$RANDOM_STRING
 fi
 
+if [ -f $SNAP_DATA/refreshed ]; then
+    rm $SNAP_DATA/refreshed
+    snapctl restart oo-ds-test.nginx
+fi
+
 $SNAP/usr/bin/python $SNAP/usr/bin/supervisord -n -c $SNAP_DATA/etc/supervisor/supervisord.conf
