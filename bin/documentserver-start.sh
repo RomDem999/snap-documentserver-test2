@@ -69,6 +69,7 @@ if [ "${JWT_SECRET}" == "default-jwt-secret" ]; then
 fi
 
 if [ -f $SNAP_DATA/refreshed ]; then
+    echo "RFX: refresh"
     rm $SNAP_DATA/refreshed
     snapctl restart oo-ds-test.nginx
 fi
