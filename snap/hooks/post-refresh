@@ -25,6 +25,8 @@ if [ -f $SNAP_DATA/example-local.json ]; then
   mv $SNAP_DATA/example-local.json $EXAMPLE_LOCAL_JSON
 else
   cp $SNAP/etc/onlyoffice/documentserver-example/local.json $EXAMPLE_LOCAL_JSON
+  JWT_SECRET=$(snapctl get onlyoffice.jwt-secret)
+  sed -i "/secret/s/default-jwt-secret/$JWT_SECRET/g" $SNAP_DATA/etc/onlyoffice/documentserver-example/local.json
 fi
 
 $SNAP/usr/sbin/generate-all-fonts.sh
