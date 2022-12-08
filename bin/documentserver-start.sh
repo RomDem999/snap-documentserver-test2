@@ -72,6 +72,8 @@ if [ -f $SNAP_DATA/refreshed ]; then
     echo "RFX: refresh"
     rm $SNAP_DATA/refreshed
     snapctl restart oo-ds-test.nginx
+    
+    rm $NGINX_CONF_PATH/ds.conf
 fi
 
 $SNAP/usr/bin/python $SNAP/usr/bin/supervisord -n -c $SNAP_DATA/etc/supervisor/supervisord.conf
