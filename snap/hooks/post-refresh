@@ -29,9 +29,5 @@ else
   sed -i "/secret/s/default-jwt-secret/$JWT_SECRET/g" $SNAP_DATA/etc/onlyoffice/documentserver-example/local.json
 fi
 
-echo "refreshed" > $SNAP_DATA/refreshed
-
-rm $SNAP_DATA/etc/onlyoffice/documentserver/nginx/ds.conf
-
 $SNAP/usr/sbin/generate-all-fonts.sh
 

@@ -37,20 +37,6 @@ else
     sed -i -e 's/"rejectUnauthorized": false/"rejectUnauthorized": true/' /var/snap/oo-ds-test/current/etc/onlyoffice/documentserver/local.json
 fi
 
-LOOPBACK_ENABLED=$(snapctl get onlyoffice.loopback)
-NGINX_CONF_PATH="$SNAP_DATA/etc/onlyoffice/documentserver/nginx"
-if [ "${LOOPBACK_ENABLED}" == "true" ]; then
-    sed -i -r 's/ #(allow)/ \1/' \
-        $NGINX_CONF_PATH/ds.conf.tmpl $NGINX_CONF_PATH/ds-ssl.conf.tmpl
-    sed -i -r 's/ #(deny)/ \1/' \
-        $NGINX_CONF_PATH/ds.conf.tmpl $NGINX_CONF_PATH/ds-ssl.conf.tmpl
-else
-    sed -i -r 's/ (allow)/ #\1/' \
-        $NGINX_CONF_PATH/ds.conf.tmpl $NGINX_CONF_PATH/ds-ssl.conf.tmpl
-    sed -i -r 's/ (deny)/ #\1/' \
-        $NGINX_CONF_PATH/ds.conf.tmpl $NGINX_CONF_PATH/ds-ssl.conf.tmpl
-fi
-
 export LC_ALL=C.UTF-8
 
 #check fonts
@@ -66,14 +52,6 @@ JWT_SECRET=$(snapctl get onlyoffice.jwt-secret)
 if [ "${JWT_SECRET}" == "default-jwt-secret" ]; then
     RANDOM_STRING=$(od -An -N4 -i < /dev/urandom | md5sum | head -c 10)
     snapctl set onlyoffice.jwt-secret=$RANDOM_STRING
-fi
-
-if [ -f $SNAP_DATA/refreshed ]; then
-    echo "RFX: refresh"
-    rm $SNAP_DATA/refreshed
-    snapctl restart oo-ds-test.nginx
-    
-    rm $NGINX_CONF_PATH/ds.conf
 fi
 
 $SNAP/usr/bin/python $SNAP/usr/bin/supervisord -n -c $SNAP_DATA/etc/supervisor/supervisord.conf
