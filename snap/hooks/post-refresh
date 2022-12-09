@@ -31,5 +31,7 @@ fi
 
 echo "refreshed" > $SNAP_DATA/refreshed
 
+rm $SNAP_DATA/etc/onlyoffice/documentserver/nginx/ds.conf
+
 $SNAP/usr/sbin/generate-all-fonts.sh
 
