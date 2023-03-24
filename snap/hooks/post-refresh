@@ -32,4 +32,3 @@ else
 fi
 
 $SNAP/usr/sbin/generate-all-fonts.sh
-
