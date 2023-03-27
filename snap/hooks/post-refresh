@@ -31,4 +31,7 @@ else
   sed -i "/enable/s/true/$JWT_ENABLED/g" $SNAP_DATA/etc/onlyoffice/documentserver-example/local.json
 fi
 
+mkdir -p $SNAP_DATA/var/lib/rabbitmq/mnesia
+mkdir -p $SNAP_DATA/var/log/rabbitmq
+
 $SNAP/usr/sbin/generate-all-fonts.sh
