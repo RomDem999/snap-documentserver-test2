@@ -1,37 +1,8 @@
 #!/bin/sh
 
-EXAMPLE_LOCAL_JSON="$SNAP_DATA/etc/onlyoffice/documentserver-example/local.json"
 
-mv $SNAP_DATA/etc/onlyoffice/documentserver/local.json $SNAP_DATA
-if [ -f $EXAMPLE_LOCAL_JSON ]; then
-  mv $EXAMPLE_LOCAL_JSON $SNAP_DATA/example-local.json
-fi
-rm -R $SNAP_DATA/etc
-rm -R $SNAP_DATA/mysql
-mv $SNAP_DATA/var/www/onlyoffice/Data/certs $SNAP_DATA
-if [ -d $SNAP_DATA/var/lib/onlyoffice/documentserver-example/files ]; then
-  mv $SNAP_DATA/var/lib/onlyoffice/documentserver-example/files $SNAP_DATA
-fi
-rm -R $SNAP_DATA/var
-mkdir -p $SNAP_DATA/var/www/onlyoffice/Data
-mv $SNAP_DATA/certs $SNAP_DATA/var/www/onlyoffice/Data
-if [ -d $SNAP_DATA/files ]; then
-  mkdir -p $SNAP_DATA/var/lib/onlyoffice/documentserver-example
-  mv $SNAP_DATA/files $SNAP_DATA/var/lib/onlyoffice/documentserver-example
-fi
-cp -R $SNAP/etc $SNAP_DATA/
-mv $SNAP_DATA/local.json $SNAP_DATA/etc/onlyoffice/documentserver/
-if [ -f $SNAP_DATA/example-local.json ]; then
-  mv $SNAP_DATA/example-local.json $EXAMPLE_LOCAL_JSON
-else
-  cp $SNAP/etc/onlyoffice/documentserver-example/local.json $EXAMPLE_LOCAL_JSON
-  JWT_SECRET=$(snapctl get onlyoffice.jwt-secret)
-  sed -i "/secret/s/default-jwt-secret/$JWT_SECRET/g" $SNAP_DATA/etc/onlyoffice/documentserver-example/local.json
-  JWT_ENABLED=$(snapctl get onlyoffice.jwt-enabled)
-  sed -i "/enable/s/true/$JWT_ENABLED/g" $SNAP_DATA/etc/onlyoffice/documentserver-example/local.json
-fi
-
-mkdir -p $SNAP_DATA/var/lib/rabbitmq/mnesia
-mkdir -p $SNAP_DATA/var/log/rabbitmq
+rm -R $SNAP_DATA/*
+cp  -R $SNAP/etc $SNAP_DATA/
+mkdir -p $SNAP_DATA/var/www/onlyoffice/Data/certs
 
 $SNAP/usr/sbin/generate-all-fonts.sh
