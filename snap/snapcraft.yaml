@@ -80,14 +80,14 @@ hooks:
 parts:
   rabbitmq:
     plugin: dump
-    source: https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.9.13/rabbitmq-server_3.9.13-1_all.deb
+    source: https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_15/rabbitmq-server_3.6.15-1_all.deb
     source-type: deb
     stage-packages:
       - erlang
     override-build: |
       craftctl default
       # rabbitmq-server
-      sed -i -e 's/rabbitmq-env/rabbitmq-env-start.sh/g' $SNAPCRAFT_PART_INSTALL/usr/lib/rabbitmq/lib/rabbitmq_server-3.9.13/sbin/rabbitmq-server
+      sed -i -e 's/rabbitmq-env/rabbitmq-env-start.sh/g' $SNAPCRAFT_PART_INSTALL/usr/lib/rabbitmq/lib/rabbitmq_server-3.6.15/sbin/rabbitmq-server
       sed -i -e 's/ROOTDIR=/ROOTDIR=$SNAP/g' $SNAPCRAFT_PART_INSTALL/usr/lib/erlang/bin/erl
 
   server:
