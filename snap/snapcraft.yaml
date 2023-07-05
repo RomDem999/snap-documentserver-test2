@@ -79,7 +79,7 @@ hooks:
     plugs: [network, network-bind, removable-media, desktop, unity7]
 
   post-refresh:
-    plugs: [desktop, unity7]
+    plugs: [network, network-bind, removable-media, desktop, unity7]
 
 parts:
   rabbitmq:
