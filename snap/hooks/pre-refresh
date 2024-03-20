@@ -8,7 +8,7 @@ echo "$SNAP_REVISION" > $SNAP_DATA/revision
 echo "Preparing for shutdown, it can take a lot of time, please wait..." > $SNAP_DATA/prep4shut
 date +%H:%M:%S:%N >> $SNAP_DATA/prep4shut
 
-curl http://localhost:8000/internal/cluster/inactive -X PUT >> $SNAP_DATA/prep4shut
+curl http://localhost:8000/internal/cluster/inactive -X PUT >> $SNAP_DATA/prep4shut 2>>$SNAP_DATA/prep4shut
 
 echo Done >> $SNAP_DATA/prep4shut
 date +%H:%M:%S:%N >> $SNAP_DATA/prep4shut
