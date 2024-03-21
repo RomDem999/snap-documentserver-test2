@@ -125,6 +125,7 @@ parts:
       - python3
       - python-setuptools
       - wget
+      - net-tools
     override-build: |
       craftctl default
       # msttcorefonts

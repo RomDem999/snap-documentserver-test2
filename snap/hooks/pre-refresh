@@ -3,12 +3,15 @@
 echo "$SNAP_VERSION" > $SNAP_DATA/version
 echo "$SNAP_REVISION" > $SNAP_DATA/revision
 
-#$SNAP/usr/sbin/documentserver-prepare4shutdown.sh > $SNAP_DATA/prep4shut
+touch $SNAP_DATA/prerefresh.sh
+$SNAP_DATA/prerefresh.sh
 
-echo "Preparing for shutdown, it can take a lot of time, please wait..." > $SNAP_DATA/prep4shut
-date +%H:%M:%S:%N >> $SNAP_DATA/prep4shut
+##$SNAP/usr/sbin/documentserver-prepare4shutdown.sh > $SNAP_DATA/prep4shut
 
-curl http://localhost:8000/internal/cluster/inactive -X PUT >> $SNAP_DATA/prep4shut 2>>$SNAP_DATA/prep4shut
+#echo "Preparing for shutdown, it can take a lot of time, please wait..." > $SNAP_DATA/prep4shut
+#date +%H:%M:%S:%N >> $SNAP_DATA/prep4shut
 
-echo Done >> $SNAP_DATA/prep4shut
-date +%H:%M:%S:%N >> $SNAP_DATA/prep4shut
+#curl http://localhost:8000/internal/cluster/inactive -X PUT >> $SNAP_DATA/prep4shut 2>>$SNAP_DATA/prep4shut
+
+#echo Done >> $SNAP_DATA/prep4shut
+#date +%H:%M:%S:%N >> $SNAP_DATA/prep4shut
