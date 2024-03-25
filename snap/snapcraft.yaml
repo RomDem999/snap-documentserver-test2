@@ -75,10 +75,6 @@ apps:
     command: usr/sbin/documentserver-pluginsmanager.sh
     plugs: [network, network-bind, removable-media, desktop, unity7]
 
-  refresh-test:
-    command: usr/sbin/refresh-test.sh
-    plugs: [network, network-bind, removable-media, desktop, unity7]
-
 hooks:
   configure:
     plugs: [network, network-bind, account-control, gpg-keys, accounts-service, system-observe] #system-files, 
@@ -444,4 +440,3 @@ parts:
       rabbitmq-env-start.sh: usr/lib/rabbitmq/bin/rabbitmq-env-start.sh
       nginx-start.sh: usr/sbin/nginx-start.sh
       generate-all-fonts.sh: usr/sbin/generate-all-fonts.sh
-      refresh-test.sh: usr/sbin/refresh-test.sh
