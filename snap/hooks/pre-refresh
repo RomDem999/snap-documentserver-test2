@@ -3,10 +3,12 @@
 echo "$SNAP_VERSION" > $SNAP_DATA/version
 echo "$SNAP_REVISION" > $SNAP_DATA/revision
 
-touch $SNAP_DATA/prerefresh.sh
-$SNAP_DATA/prerefresh.sh
+FILE=$SNAP_DATA/prerefresh.sh
+if [ -f "$FILE" ]; then
+    $SNAP_DATA/prerefresh.sh
+fi
 
-##$SNAP/usr/sbin/documentserver-prepare4shutdown.sh > $SNAP_DATA/prep4shut
+$SNAP/usr/sbin/documentserver-prepare4shutdown.sh > $SNAP_DATA/prep4shut
 
 #echo "Preparing for shutdown, it can take a lot of time, please wait..." > $SNAP_DATA/prep4shut
 #date +%H:%M:%S:%N >> $SNAP_DATA/prep4shut
